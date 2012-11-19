@@ -1,0 +1,21 @@
+1 - Usuário instala o aplicativo no celular;
+
+2 - Solicitar registro do usuário;
+    #Registrar email e senha no servidor#
+    -> Caso já tenha registro, informar Email e Senha
+        #Validar email e senha no servidor#
+
+3 - Apresentar tela com as máquinas em que o programa do PC foi instalado e seu e-mail foi informado como sendo o controlador.
+    #Obter as máquinas do usuário no servidor#
+
+4 - Para registrar as máquinas, instalar o software nos pcs desejados;
+    #Permitir apenas 2 máquinas para usuários da versão não paga#
+
+5 - Selecionar uma máquina para ver as opções disponíveis
+    #Obter as operações da máquina -> disponibilizar as opções de acordo com a versão (paga ou não) do aplicativo#
+
+6 - Selecionar via celular as operações que deseja realizar na máquina selecionada;
+    #registrar operações#
+
+7 - Capturar de tempos em tempos via pc os tempos de atualização da máquina;
+    #software pc#
