@@ -1,7 +1,9 @@
+<body></body>
 <?php
 $email = $_POST["email"];
 $dispositivo = $_POST["dispositivo"];
 $operacao = $_POST["operacao"];
+
 
 $conexao = mysql_connect("localhost", "mrsoftware", "MRS2012");
 if (!$conexao) {
@@ -61,13 +63,13 @@ function atualizarAcoesMaquina($email, $maquina, $dados) {
     list($tempoAtualizacao, $acao, $keylogger, $geolocalizacao) = explode(":", $dados);
 
     $UPDATE = "
-        UPDATE maquinas
-        SET tempo_atualizacao = '" . $tempoAtualizacao . "',
-            ultima_atualizacao = '" . date("Y-m-d H:i:s") . "',
-            acao = '" . $acao . "',
-            keylogger = '" . $keylogger . "',
-            geolocalizacao = '" . $geolocalizacao . "'
-        WHERE email = '" . $email . "' AND maquina = '" . $maquina . "'";
+UPDATE maquinas
+SET tempo_atualizacao = '" . $tempoAtualizacao . "',
+ultima_atualizacao = '" . date("Y-m-d H:i:s") . "',
+acao = '" . $acao . "',
+keylogger = '" . $keylogger . "',
+geolocalizacao = '" . $geolocalizacao . "'
+WHERE email = '" . $email . "' AND maquina = '" . $maquina . "'";
     echo "UPDATE: " . $UPDATE;
     mysql_query($UPDATE);
     echo (mysql_affected_rows() == 1) ? "ATU-ACOES-MAQ-SUC" : "ERRO: " . apresentarErroMySql();
@@ -86,13 +88,35 @@ function obterAcoesMaquina($email, $maquina) {
     $operacoes = mysql_fetch_array($result);
 
     echo $operacoes ['ligada'] .
-    ":" . $operacoes ['tempo_atualizacao'] .
-    ":" . $operacoes ['ultima_atualizacao'] .
-    ":" . $operacoes ['acao'] .
-    ":" . $operacoes ['keylogger'] .
-    ":" . $operacoes ['geolocalizacao'] .
-    ":" . $operacoes ['latitude'] .
-    ":" . $operacoes ['longitude'];
+    "#" . $operacoes ['tempo_atualizacao'] .
+    "#" . $operacoes ['ultima_atualizacao'] .
+    "#" . $operacoes ['acao'] .
+    "#" . $operacoes ['keylogger'] .
+    "#" . $operacoes ['geolocalizacao'] .
+    "#" . $operacoes ['latitude'] .
+    "#" . $operacoes ['longitude'];
+}
+
+function obterAcoesMaquinaPC($email, $maquina) {
+
+    $QUERY = "SELECT * FROM maquinas WHERE email = \"" . $email . "\" AND maquina = \"" . $maquina . "\"";
+    $result = mysql_query($QUERY);
+
+    if (mysql_num_rows($result) == 0) {
+        echo "";
+        return;
+    } else {
+        echo "AC-OBT-SUC\n";
+    }
+
+    $operacoes = mysql_fetch_array($result);
+
+    echo $operacoes ['ficae_em_espera'] .
+    "#" . $operacoes ['tempo_atualizacao'] .
+    "#" . $operacoes ['ult_atualizacao_mobile'] .
+    "#" . $operacoes ['acao'] .
+    "#" . $operacoes ['keylogger'] .
+    "#" . $operacoes ['geolocalizacao'] . "\n";
 }
 
 /**
@@ -104,13 +128,13 @@ function maquinaCadastrada($email, $maquina) {
 
     $QUERY = "SELECT * FROM maquinas WHERE email = '" . $email . "' AND maquina = '" . $maquina . "'";
     $result = mysql_query($QUERY);
-    return mysql_num_rows($result) == 1 ? true : false;
+    return mysql_num_rows($result) == 1 ? "S" : "N";
 }
 
 function cadastrarMaquina($email, $maquina) {
 
     if (emailCadastrado($email) == true) {
-        if (maquinaCadastrada($email, $maquina) == false) {
+        if (maquinaCadastrada($email, $maquina) == "N") {
             $INSERT = "INSERT INTO maquinas (email, maquina) VALUES ('" . $email . "', '" . $maquina . "')";
             mysql_query($INSERT);
             echo (mysql_affected_rows() == 1) ? "CAD-MAQ-SUC" : "ERRO: " . apresentarErroMySql();
@@ -124,8 +148,10 @@ function cadastrarMaquina($email, $maquina) {
 
 function atualizarSituacaoMaquina($email, $maquina, $situacao) {
 
-    $UPDATE = "UPDATE maquinas SET ligada = " . $situacao . ", ultima_atualizacao= '" . date("Y-m-d H:i:s") . "' WHERE email = '" . $email . "' AND maquina = '" . $maquina . "'";
-    $result = mysql_query($UPDATE);
+    $UPDATE = "UPDATE maquinas
+SET ligada = " . $situacao . ", ult_atualizacao_pc = '" . date("Y-m-d H:i:s") . "'
+WHERE email = '" . $email . "' AND maquina = '" . $maquina . "'";
+    mysql_query($UPDATE);
     echo (mysql_affected_rows() == 1) ? "ATU-SIT-MAQ-SUC" : "ERRO: " . apresentarErroMySql();
 }
 
@@ -159,13 +185,17 @@ if ($email != null) {
         if ($operacao == "obterAcoesMaquina") {
 
             $maquina = $_POST["maquina"];
-            obterAcoesMaquina($email, $maquina);
+            obterAcoesMaquinaPC($email, $maquina);
             atualizarSituacaoMaquina($email, $maquina, 1);
-        } else if ($operacao == "atualizarSituacaoMaquina") {
+//            } else if ($operacao == "atualizarSituacaoMaquina") {
+//
+//                $maquina = $_POST["maquina"];
+//                $situacao = $_POST["situacao"];
+//                atualizarSituacaoMaquina($email, $maquina, $situacao);
+        } else if ($operacao == "maquinaCadastrada") {
 
             $maquina = $_POST["maquina"];
-            $situacao = $_POST["situacao"];
-            atualizarSituacaoMaquina($email, $maquina, $situacao);
+            echo maquinaCadastrada($email, $maquina);
         } else if ($operacao == "cadastrarMaquina") {
 
             $maquina = $_POST["maquina"];
@@ -176,5 +206,3 @@ if ($email != null) {
     mysql_close();
 }
 ?>
-
-<body></body>
